@@ -26,8 +26,8 @@ function logUser($email, $password)
 
 function getUser($id) {
     $connexion = connectDb();
-    if (is_numeric($_GET['id']) && abs($_GET['id']) == $_GET['id']) {
-        $sql = 'SELECT * FROM users WHERE id = '.$_GET['id'];
+    if (is_numeric($_POST['id']) && abs($_POST['id']) == $_POST['id']) {
+        $sql = 'SELECT * FROM users WHERE id = '.$_POST['id'];
     }
     else{echo "Sorry, only positive integers allowed here!";}
     $stmt = $connexion->prepare($sql);

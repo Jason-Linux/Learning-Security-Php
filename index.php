@@ -3,15 +3,36 @@ require_once('functions.php');
 session_start();
 $user = $_SESSION['user'] ?: null;
 $captchaError = '';
+$db = connectDb();
 if(isset($_POST['captcha'])) {
     if ($_POST['captcha'] == $_SESSION['captcha']) {
-        echo "Captcha valide !";
+       echo "Captcha valide !";
         if (isset($_POST['email']) && isset($_POST['password'])) {
-            $users = logUser($_POST['email'], $_POST['password']);
-                 if(!empty($users)) {
-                    $user = $users[0];
-                    $_SESSION['user'] = $user;
+        //if (!empty($_POST['email']) && !empty($_POST['password'])) {
+            $email = $_POST['email'];
+            $password = $_POST['password'];
+            $q = $db->prepare('SELECT * FROM users WHERE email= :email');
+            $q->bindValue('email', $email);
+            $q->execute();
+            $res = $q->fetch(PDO::FETCH_ASSOC);
+            if($res){
+                $passwordHash = $res['password'];
+                if(password_verify($password,$passwordHash)){
+                    //var_dump($password);
+                    //var_dump($passwordHash);
+                    echo "Connexion établie";
+                    $users = logUser($_POST['email'], $_POST['password']);
+                        if(!empty($users)) {
+                            $user = $users[0];
+                            $_SESSION['user'] = $user;
+                        }
                 }
+                else{
+                    echo "Mauvais Mot De Passe !!";
+                }
+            }else{
+                echo "Mauvais Mail/Mot De Passe !!";
+            }      
         }           
     } else {
         $captchaError = "Captcha Invalide !";
@@ -46,7 +67,7 @@ if(isset($_POST['captcha'])) {
             <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small >
         </div>
         <div class="form-group">
-            <label for="exampleInputPassword1">Password</label>
+    <label for="exampleInputPassword1">Password</label>
             <input name="password" type="password" class="form-control" id="exampleInputPassword1">
         </div>
         <div class="form-group">

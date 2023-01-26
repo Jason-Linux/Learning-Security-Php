@@ -1,8 +1,8 @@
 <?php
 require_once('functions.php');
 $user = null;
-if(isset($_GET['id'])) {
-    $users = getUser($_GET['id']);
+if(isset($_POST['id'])) {
+    $users = getUser($_POST['id']);
     if(!empty($users)) {
         $user = $users[0];
     }
