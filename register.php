@@ -2,17 +2,29 @@
 require_once('functions.php');
 session_start();
 $captchaError = '';
+$SetPassError = '';
 if(isset($_POST['captcha'])) {
     if ($_POST['captcha'] == $_SESSION['captcha']) {
         echo "Captcha valide !";
-        if (isset($_POST['username']) && isset($_POST['email']) && isset($_POST['password'])) {
+        $password = $_POST['password'];
+        $email = $_POST['email'];
+        $uppercase = preg_match('@[A-Z]@', $password);
+        $lowercase = preg_match('@[a-z]@', $password);
+        $number    = preg_match('@[0-9]@', $password);
+        $specialChars = preg_match('@[^\w]@', $password);
+        if (isset($_POST['username']) && isset($email) && isset($password)) {
+            if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 12){
+                $SetPassError = 'Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.' ;
+            }else{
             $result = saveUser($_POST['username'], $_POST['email'], password_hash($_POST['password'], PASSWORD_DEFAULT, ['cost' => 12]));
-                if($result === true) {
+            #Minimum 12 caractères spéciaux recommendation ANSSI
+                
+            if($result === true) {
                     header('Location: index.php');
                 } else {
                     echo "Une erreur est survenue " . $result;
                 }
-        }
+        }}
     } else {
     $captchaError = "Captcha Invalide !";
     }
@@ -29,6 +41,7 @@ if(isset($_POST['captcha'])) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 </head>
 <body>
+<a href="index.php">HOME</a>
 <div class="container">
     <h1>Inscription</h1>
     <form action="/register.php" method="POST" class="needs-validation" novalidate>
@@ -65,6 +78,7 @@ if(isset($_POST['captcha'])) {
             <?= $captchaError ?>
             <!-- <input type="submit" /> -->
         <button type="submit" class="btn btn-primary">S'inscrire</button>
+        <?= $SetPassError ?>
     </form>
     <script>
         var password = document.getElementById("password");
